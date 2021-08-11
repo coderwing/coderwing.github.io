@@ -4,10 +4,10 @@
 baseurl:
 url: https://coderwing.github.io
 date_format: "ordinal"
-title: 宋文兄
+title: 宋旭东
 subtitle: "日拱一卒无有尽,功不唐捐终入海"
-description: "宋文兄的个人博客"
-keywords: 宋文兄,coderwing,Wator
+description: "宋旭东的个人博客"
+keywords: 宋旭东,coderwing,Wator
 timezone: Asia/Shanghai
 encoding: "utf-8"
 side_bar_repo_limit: 5
