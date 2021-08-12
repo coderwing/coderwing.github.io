@@ -1,6 +1,7 @@
 # ---------------- #
 #   Main Configs   #
 # ---------------- #
+## 这些变量都是site级别的，使用：{{ site.location }}
 baseurl:
 url: https://coderwing.github.io
 date_format: "ordinal"
