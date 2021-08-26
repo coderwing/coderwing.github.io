@@ -1,4 +1,3 @@
-
 ---
 layout: post
 title: Redis单机安装的正确姿势
