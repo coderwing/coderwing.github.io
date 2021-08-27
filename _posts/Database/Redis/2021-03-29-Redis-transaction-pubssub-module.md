@@ -3,7 +3,7 @@ layout: post
 title: Redis发布订阅、事务、模块&布隆过滤器
 categories: [Redis, 缓存, 数据库]
 description: redis基础功能使用
-keywords: redis, 缓存
+keywords: redis, 缓存, bloom, 布隆过滤器
 ---
 
 # Redis发布订阅、事务、模块&布隆过滤器
