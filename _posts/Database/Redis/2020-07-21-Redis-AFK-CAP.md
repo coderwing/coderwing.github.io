@@ -8,7 +8,6 @@ keywords: redis, 缓存, ADK, CAP
 
 ## AFK原理 & CAP理论
 
-
 ### AFK微服务拆分原则
 
 ```
