@@ -1,30 +1,3 @@
-
-
-## AFK原理 & CAP理论
-
-### AFK微服务拆分原则
-
-
-### 单点问题
-```
-1、单点故障
-2、容量压力
-3、并发压力
-4、吞吐量压力
-```
-**解决**
-
-X轴 单点问题可以使用副本备份（全量镜像）来解决，解决读的单点故障压力
-![](https://gitee.com/coderwing/blog-images/raw/master/数据库/redis5/redis详解.md/4860478576616.png)
-
-Y轴 容量压力解决：通过将不同类不同业务的数据放在不同的redis节点上
-分布式redis节点的方式实现数据存储容量压力和读写压力。
-类似于微服务架构设计方案。
-
-Z轴 进一步使用X+Y整体的副本
-
-![](https://gitee.com/coderwing/blog-images/raw/master/数据库/redis5/redis详解.md/5281544894923.png)
-
 ---
 layout: post
 title: Redis AFK和CAP
@@ -33,7 +6,61 @@ description: redis AFK and CAP
 keywords: redis, 缓存, ADK, CAP
 ---
 
-### XYZ设计问题
+## AFK原理 & CAP理论
+
+### AFK微服务拆分原则
+
+```
+通过不同维度的差分和组合完成最终的设计方案，将不同的维度拆分成X-Y-Z轴三个方向
+```
+
+#### 单点问题
+
+```
+1、单点故障
+2、容量压力
+3、并发压力
+4、吞吐量压力
+```
+**单点故障**
+
+首先来看单节点的单点故障这个问题,既然单节点容易挂,那么就能够进行复制,一变多,这儿设计到三个概念,主从、主主、主备,也是三种方式,简单来讲,主主至关于多台服务器同时对外提供读写:性能
+![](https://gitee.com/coderwing/blog-images/raw/master/数据库/redis5/redis详解.md/970216240196.png)
+
+主从,主机能够读写,可是通常只对外提供写,从机对外提供读:设计
+![](https://gitee.com/coderwing/blog-images/raw/master/数据库/redis5/redis详解.md/3074500110705.png)
+
+主备,主机提供读写,备机不对外提供服务,当主机挂了的时候,备机经过选举产生主机对外提供服务。
+![](https://gitee.com/coderwing/blog-images/raw/master/数据库/redis5/redis详解.md/4789989007770.png)
+
+
+
+**解决**
+
+X轴 单点问题可以使用副本备份（全量镜像）来解决，解决读的单点故障压力
+![](https://gitee.com/coderwing/blog-images/raw/master/数据库/redis5/redis详解.md/1086393375856.png)
+上图就是AKF拆分示意图,为了解决单点故障,因此弄几台全量数据的机器作备份,例如以前说到的主主、主备等,特色是任何两台包含的数据是差很少的,一台能够当作另外一台的镜像。
+![](https://gitee.com/coderwing/blog-images/raw/master/数据库/redis5/redis详解.md/4860478576616.png)
+
+Y轴 容量压力解决：通过将不同类不同业务的数据放在不同的redis节点上
+分布式redis节点的方式实现数据存储容量压力和读写压力。
+类似于微服务架构设计方案。
+```
+这时候又有新的问题,例如一台服务器中,可能某些功能被频繁访问,涉及到的数据频繁读写,其余数据基本不怎么访问,这时候能够将这部分数据独立出来,也就是根据功能、业务继续拆分服务器,这种拆解就是AFK中的**Y轴拆分**特色是Y轴纵向来看不一样的Redis负责的功能是不一样的,也就是所包含的数据也是不一样的,另外仅仅扩展出一个Y轴上的业务服务器,又可能会存在单点问题,因此能够结合AFK的X轴拆分原则,继续对刚拆分的Y轴上的点进行X轴拆分。
+```
+![](https://gitee.com/coderwing/blog-images/raw/master/数据库/redis5/redis详解.md/4037123259534.png)
+
+
+Z轴 进一步使用X+Y整体的副本
+```
+在上面的AFK原则X-Y拆分以后,对服务器显示作了主从主备复制,而后作了业务拆分,不一样的Redis负责不一样的业务请求,这时候还会有一个新的问题,例如对于Y轴上一个Redis,它负责某同样业务,可是这天这个业务的数据访问巨大,贼大,那就只好对数据请求进行AFK的Z轴拆分,例如先分析下数据请求的状况,而后根据访问来源,分为北京的、上海的,这样不一样的Redis虽然是负责不一样的数据,可是负责的业务是同样的
+```
+![](https://gitee.com/coderwing/blog-images/raw/master/数据库/redis5/redis详解.md/921132049091.png)
+
+![](https://gitee.com/coderwing/blog-images/raw/master/数据库/redis5/redis详解.md/5281544894923.png)
+
+
+#### XYZ设计问题
 ```
 1、一变多一致性：提高了可用性，出现一致性问题
 2、强一致性：全部阻塞直到数据一致，破坏可用性，因为多节点同步阻塞会影响并发性能，不实现强一致性，又会出现个节点数据可能不一致的情况。
@@ -41,6 +68,16 @@ keywords: redis, 缓存, ADK, CAP
 ![](https://gitee.com/coderwing/blog-images/raw/master/数据库/redis5/redis详解.md/4019008349765.png)
 
 上图中不一定使用kafka组件，这里的组件解决快速同步数据到Redis节点，并且可以存储数据，保证前方redis节点几遍丢失了数据，也可以同步到后面其他的redis节点。
+
+**AFK总结**
+
+```
+X轴拆分:水平复制，就是讲单体系统多运行几个实例，作集群加负载均衡的模式,主主、主备、主从。
+
+Y轴拆分:基于不一样的业务拆分
+
+Z轴拆分:基于数据拆分。
+```
 
 ### CAP理论
 
