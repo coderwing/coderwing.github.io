@@ -1,3 +1,11 @@
+---
+layout: post
+title: 一致性hash
+categories: [一致性hash, hash, 算法]
+description: consistency hash
+keywords: hash, 算法， 一致性hash
+---
+
 
 # 一致性hash
 
